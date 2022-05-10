@@ -21,3 +21,5 @@ def handler(e):
 
 mesaj.bind('<Return>',handler)
 master.mainloop()
+
+#amro
