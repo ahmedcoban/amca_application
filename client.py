@@ -1,3 +1,4 @@
+from cProfile import label
 from tkinter import *
 import socket
 import threading
@@ -22,24 +23,27 @@ text_scroll = Scrollbar(my_frame, command=multiple_yview)
 
 # Create Two Text Boxes
 my_text1 = Text(my_frame, width=25, height=20, font=("Helvetica", 16), yscrollcommand=text_scroll.set, wrap="none")
-my_text1.pack(side="top", padx=5)
+my_text1.pack(fill=BOTH, expand=True)
 
 
 my_text2 = Text(my_frame, width=38, height=1,  wrap="none")
-my_text2.pack(side="bottom", padx=2)
+my_text2.pack(fill=BOTH, expand=True)
+
+my_text3 = Text(my_frame, width=25, height=20, font=("Helvetica", 16), yscrollcommand=text_scroll.set, wrap="none")
+my_text3.pack(fill=BOTH, expand=True)
 
 def handler(e):
-        message = '{}: {}'.format(nickname, my_text2.get("1.0",INSERT))
+        message = '{}: {}'.format(nickname, my_text2.get("0.0",INSERT))
         CLIENT.send(message.encode('UTF-8'))
-        my_text2.delete(1.0,END)
-        my_text2.delete(1.0,END)
+        my_text2.delete(0.0,END)
+        my_text2.delete(0.0,END)
 
 my_text2.bind('<Return>',handler)
 
 
 
 nickname = input("Choose your nickname: ")
-HOST = '192.168.43.124'
+HOST = '10.123.13.57'
 PORT = 8080
 ADDR = (HOST, PORT)
 
@@ -55,11 +59,16 @@ def receive():
             message = CLIENT.recv(1024).decode('UTF-8')
             if message == 'NICK':
                 CLIENT.send(nickname.encode('UTF-8'))
+            elif 'NICKNAMES' in message:
+                my_text3.delete(0.0,END)
+                for word in message.replace("Connected to server!", "").replace("NICKNAMES", "").split(" "):
+                    my_text3.insert(END, word + ", ")
             else:
-                my_text1.insert(END,message+'\n')
-        except:
+                my_text1.insert(END,'\n' + message)
+            my_text2.delete(1.0,END)
+        except Exception as e:
             # Close Connection When Error
-            print("An error occured!")
+            print("An error occured!" + e)
             CLIENT.close()
             break
 

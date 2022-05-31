@@ -16,17 +16,20 @@ clients = []
 nicknames = []
 
 def broadcast(message,ip):
+    nicknameStr = ""
+    for nickname in nicknames:
+        nicknameStr += nickname + " "
     for client in clients:
-        if client == ip :
-            pass
-        else:
-            client.send(message)
+        client.send(message)
+        client.send('NICKNAMES {}'.format(nicknameStr).encode('UTF-8'))
+        
 
 def handle(client):
     while True:
         try:
             # Broadcasting Messages
             message = client.recv(1024)
+            
             broadcast(message,client)
         except:
             # Removing And Closing Clients
@@ -34,8 +37,8 @@ def handle(client):
             clients.remove(client)
             client.close()
             nickname = nicknames[index]
-            broadcast('{} left!'.format(nickname).encode('UTF-8'),client)
             nicknames.remove(nickname)
+            broadcast('{} left!'.format(nickname).encode('UTF-8'),client)
             break
 
 # Receiving / Listening Function
